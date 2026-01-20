@@ -29,12 +29,12 @@
 			<h3 class="line-clamp-1 text-xl font-bold hover:underline">{product.name}</h3>
 		</a>
 		<p class="line-clamp-2 text-wrap whitespace-break-spaces">{product.description}</p>
+		<p class="pt-2 text-lg font-bold">${product.price.toFixed(2)}</p>
 	</div>
-	<p class="text-lg font-bold">${product.price.toFixed(2)}</p>
 	<div>
-		<div class="mb-2 flex h-[1em] gap-1">
+		<div class="mb-2 flex h-[1em] gap-1 overflow-x-auto">
 			{#each product.categories as category}
-				<Badge variant="outline">{category}</Badge>
+				<Badge class="min-w-0" variant="outline">{category}</Badge>
 			{/each}
 		</div>
 		<p class="flex gap-2 text-nowrap sm:text-sm">
