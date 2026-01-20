@@ -8,7 +8,8 @@ export async function load({ params }) {
   const product = products.find((product) => product.id === params.id);
   if (!product) error(404, "Producto no encontrado");
 
-  const plateModels = models.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).filter(model => model.productId === product.id)
+  const plateModels = models.filter(model => model.productId === product.id)
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .map(model => {
       const printPlates = plates.filter(plate => plate.modelId === model.id);
       return {

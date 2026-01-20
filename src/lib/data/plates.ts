@@ -52,9 +52,9 @@ export default [
     modelId: models[2].id,
     name: "Placa 2",
     thumbnailId: null,
-    timeSeconds: 10 * 60,
-    weightGrams: 25,
-    objects: 1,
+    timeSeconds: 15 * 60,
+    weightGrams: 100,
+    objects: 5,
     filaments: [
       { type: "PLA", color: "#FF0000" },
       { type: "ABS", color: "#00FF00" },
