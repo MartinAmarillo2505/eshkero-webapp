@@ -23,7 +23,7 @@
 		<div class="flex flex-col justify-between gap-2">
 			<div>
 				<h1 class="text-xl font-bold">{product.name}</h1>
-				<p class="line-clamp-2 text-wrap">{product.description}</p>
+				<p class="line-clamp-2 text-wrap whitespace-break-spaces">{product.description}</p>
 			</div>
 			<div>
 				<div class="mb-2 flex h-[1em] gap-1">
@@ -110,7 +110,9 @@
 				<div class="flex grow flex-col justify-between gap-1">
 					<div class="line-clamp-4">
 						<h3 class="font-bold">{model.versionName}</h3>
-						<p class="text-sm text-secondary-foreground">{model.versionNotes}</p>
+						<p class="text-sm whitespace-break-spaces text-secondary-foreground">
+							{model.versionNotes}
+						</p>
 					</div>
 					<p class="flex gap-2 text-xs text-nowrap sm:text-sm">
 						<span class="flex items-center gap-0.5">

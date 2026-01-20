@@ -5,7 +5,7 @@ import plates from "$lib/data/plates";
 export async function load() {
   return {
     products: products.map(product => {
-      const model = models.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()).find(model => model.productId === product.id);
+      const model = models.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).find(model => model.productId === product.id);
       const modelPlates = plates.filter(plate => plate.modelId === model?.id);
 
       const plateCount = modelPlates.length;

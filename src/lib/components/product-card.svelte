@@ -28,7 +28,7 @@
 				alt={`Imagen del producto ${product.name}`} />
 			<h3 class="line-clamp-1 text-xl font-bold hover:underline">{product.name}</h3>
 		</a>
-		<p class="line-clamp-2 text-wrap">{product.description}</p>
+		<p class="line-clamp-2 text-wrap whitespace-break-spaces">{product.description}</p>
 	</div>
 	<p class="text-lg font-bold">${product.price.toFixed(2)}</p>
 	<div>
