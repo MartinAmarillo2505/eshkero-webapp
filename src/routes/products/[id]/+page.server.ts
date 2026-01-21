@@ -14,7 +14,7 @@ export async function load({ params }) {
       const printPlates = plates.filter(plate => plate.modelId === model.id);
       return {
         ...model,
-        plates: printPlates,
+        plateCount: printPlates.length,
         timeSeconds: printPlates.reduce((acc, plate) => acc + plate.timeSeconds, 0),
         weightGrams: printPlates.reduce((acc, plate) => acc + plate.weightGrams, 0)
       }
