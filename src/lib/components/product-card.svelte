@@ -33,7 +33,7 @@
 		<p class="line-clamp-2 text-wrap whitespace-break-spaces">{product.description}</p>
 	</div>
 	<div>
-		<p class="mb-2 pt-2 text-lg font-bold">${formatPrice(product.price ?? 0)}</p>
+		<p class="pt-2 text-lg font-bold">${formatPrice(product.price ?? 0)}</p>
 		<div class="mb-2 flex h-[1em] gap-1 overflow-x-auto">
 			{#each product.categories as category}
 				<Badge class="min-w-0" variant="outline">{category}</Badge>
