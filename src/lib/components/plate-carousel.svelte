@@ -20,13 +20,15 @@
 	<h1 class="text-xl font-bold">Placas</h1>
 	<section class="flex gap-4 overflow-x-auto rounded bg-primary-foreground p-2">
 		{#each plates as plate, index}
-			<article class="basis-auto">
-				<img
-					class="aspect-square w-32 rounded object-cover"
-					src={`/uploads/${plate.thumbnailSha1}`}
-					loading="lazy"
-					alt={`Imagen de la placa ${plate.name}`} />
-				<p class="font-bold">{plate.name || `Placa ${index + 1}`}</p>
+			<article class="flex basis-auto flex-col justify-between">
+				<div>
+					<img
+						class="aspect-square w-32 rounded object-cover"
+						src={`/uploads/${plate.thumbnailSha1}`}
+						loading="lazy"
+						alt={`Imagen de la placa ${plate.name}`} />
+					<p class="font-bold">{plate.name || `Placa ${index + 1}`}</p>
+				</div>
 				<p class="flex gap-2 text-xs text-nowrap">
 					<span class="flex items-center gap-0.5">
 						<Box size="1em" />
