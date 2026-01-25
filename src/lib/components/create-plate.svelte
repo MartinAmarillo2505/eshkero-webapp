@@ -38,7 +38,6 @@
 <article class="flex gap-2">
 	<ImageInput
 		class="flex aspect-square w-16 shrink-0 grow-0 items-center rounded bg-input/30 object-cover sm:w-24"
-		name={`plate[${key}][thumbnail]`}
 		bind:value={thumbnail}
 		required />
 	<div class="flex flex-col justify-between gap-2">
@@ -53,7 +52,6 @@
 			<span class="flex items-center gap-0.5">
 				<Box size="1em" />
 				{plate.objects}
-				<input type="text" name={`plate[${key}][objects]`} value={plate.objects} hidden />
 			</span>
 			<span class="flex items-center gap-0.5">
 				<Clock size="1em" />

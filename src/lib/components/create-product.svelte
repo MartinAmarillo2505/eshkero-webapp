@@ -81,12 +81,12 @@
 				<div>
 					<ImageInput
 						class="flex aspect-square w-24 shrink-0 grow-0 items-center rounded bg-input/30 object-cover sm:w-32"
-						name="thumbnail"
 						value={customImage}
 						required />
 					<label for="is-custom">
 						<input
 							type="checkbox"
+							name="useFileThumbnail"
 							id="is-custom"
 							bind:checked={useCustomImage}
 							disabled={product.fileThumbnail === undefined} />
@@ -120,7 +120,7 @@
 								class="max-w-[2ch] [appearance:textfield] bg-input/30 text-right"
 								placeholder="00"
 								type="number"
-								min="0"
+								min={timeSeconds == 0 ? 1 : 0}
 								bind:value={timeHours}
 								required />
 							h
@@ -129,7 +129,7 @@
 								class="max-w-[2ch] [appearance:textfield] bg-input/30 text-right"
 								placeholder="00"
 								type="number"
-								min="0"
+								min={timeHours == 0 ? 1 : 0}
 								max="59"
 								bind:value={timeMinutes} />
 							m
@@ -139,8 +139,9 @@
 						<span class="flex items-center gap-0.5">
 							<Weight size="1em" />
 							<input
-								class="max-w-[6ch] [appearance:textfield] bg-input/30 text-right placeholder-foreground"
+								class="max-w-[6ch] [appearance:textfield] bg-input/30 text-right"
 								placeholder={totalWeightGrams.toFixed(2)}
+								min={totalWeightGrams == 0 ? 1 : 0}
 								step="0.01"
 								type="number"
 								name="weightGrams"
