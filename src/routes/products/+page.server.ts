@@ -65,6 +65,8 @@ export const actions: Actions = {
     const thumbnail = (useFileThumbnail === 'on' ? await _3mfFileThumbnail : await _3mfThumbnail) ?? await _3mfFileThumbnail ?? await _3mfThumbnail ?? await Object.values(_3mf.plates ?? {}).find(plate => plate.thumbnail)?.thumbnail;
     if (!thumbnail) return fail(400, { error: 'Thumbnail is required' });
 
+    if (Object.values(_3mf.plates).find(plate => !plate.thumbnail)) return fail(400, { error: 'All plates must have a thumbnail' });
+
     const fileSha1 = createHash('sha1').update(Buffer.from(await file.arrayBuffer())).digest('hex');
     const existingProduct = await getProductByFileSha1(fileSha1);
     if (existingProduct) return fail(400, { error: `Product with this file already exists: ${existingProduct.name}` });
