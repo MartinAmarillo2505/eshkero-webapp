@@ -20,7 +20,8 @@
 	$effect(() => {
 		let promise = product?.thumbnail ?? product?.plates?.[0]?.thumbnail;
 		if (useCustomImage) promise = product?.fileThumbnail ?? promise;
-		promise?.then((file) => (customImage = file));
+		if (promise) promise.then((file) => (customImage = file));
+		else customImage = undefined;
 	});
 
 	let timeSeconds = $derived(
