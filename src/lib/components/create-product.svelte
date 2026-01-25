@@ -61,7 +61,7 @@
 		if (force) {
 			files = new DataTransfer().files;
 			error = undefined;
-		} else if (!confirm('¿Estás seguro de que quieres cancelar?')) cancel(true);
+		} else if (confirm('¿Estás seguro de que quieres cancelar?')) cancel(true);
 	}
 
 	$effect(() => {
