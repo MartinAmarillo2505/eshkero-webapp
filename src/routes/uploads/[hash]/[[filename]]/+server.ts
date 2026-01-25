@@ -18,7 +18,7 @@ export async function GET({ params }) {
     .where(and(eq(staticFile.sha1, hash), filename === undefined ? isNull(staticFile.filename) : eq(staticFile.filename, filename)))
     .limit(1);
 
-  if (!rows) return error(404, "Not found");
+  if (rows.length === 0) return error(404, "Not found");
 
   return new Response(await readFile(filePath), {
     headers: {
