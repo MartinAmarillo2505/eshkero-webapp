@@ -20,5 +20,9 @@ export async function GET({ params }) {
 
   if (!rows) return error(404, "Not found");
 
-  return new Response(await readFile(filePath));
+  return new Response(await readFile(filePath), {
+    headers: {
+      "Cache-Control": "public, max-age=31536000, immutable"
+    }
+  });
 }
