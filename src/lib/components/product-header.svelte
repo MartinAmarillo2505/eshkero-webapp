@@ -32,7 +32,7 @@
 </script>
 
 <section class="mb-2 flex flex-wrap gap-2 rounded bg-secondary p-2 md:flex-nowrap">
-	<div class="flex grow gap-2">
+	<div class="flex grow gap-2 overflow-auto">
 		<img
 			src={`/uploads/${product.thumbnailSha1}`}
 			class="aspect-square w-32 rounded object-cover"
