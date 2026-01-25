@@ -62,7 +62,7 @@ export const actions: Actions = {
     const useFileThumbnail = formData.get('useFileThumbnail') as string | null;
 
     const { thumbnail: _3mfThumbnail, fileThumbnail: _3mfFileThumbnail, ..._3mf } = await analyze3mfFile(await file.arrayBuffer());
-    const thumbnail = useFileThumbnail === 'on' ? await _3mfFileThumbnail : await _3mfThumbnail;
+    const thumbnail = (useFileThumbnail === 'on' ? await _3mfFileThumbnail : await _3mfThumbnail) ?? await _3mfFileThumbnail ?? await _3mfThumbnail ?? await Object.values(_3mf.plates ?? {}).find(plate => plate.thumbnail)?.thumbnail;
     if (!thumbnail) return fail(400, { error: 'Thumbnail is required' });
 
     const fileSha1 = createHash('sha1').update(Buffer.from(await file.arrayBuffer())).digest('hex');

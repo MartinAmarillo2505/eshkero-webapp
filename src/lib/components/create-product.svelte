@@ -18,7 +18,9 @@
 	onMount(() => cancel(true));
 
 	$effect(() => {
-		let promise = product?.thumbnail ?? product?.plates?.[0]?.thumbnail;
+		let promise =
+			product?.thumbnail ??
+			Object.values(product?.plates ?? {}).find((plate) => plate.thumbnail)?.thumbnail;
 		if (useCustomImage) promise = product?.fileThumbnail ?? promise;
 		if (promise) promise.then((file) => (customImage = file));
 		else customImage = undefined;
