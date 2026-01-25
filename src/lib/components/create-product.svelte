@@ -6,11 +6,15 @@
 	import Input from './ui/input/input.svelte';
 	import ImageBlob from './image-blob.svelte';
 	import { enhance } from '$app/forms';
+	import { onMount } from 'svelte';
 
 	let files = $state<FileList>();
 	let product = $state<Awaited<ReturnType<typeof analyze3mfFile>>>();
 	let useCustomImage = $state(false);
 	let customImage = $state<File>();
+
+	onMount(() => cancel(true));
+
 	$effect(() => {
 		let promise = product?.thumbnail ?? product?.plates?.[0]?.thumbnail;
 		if (useCustomImage) promise = product?.fileThumbnail ?? promise;
@@ -49,6 +53,11 @@
 		product = await analyze3mfFile(await file.arrayBuffer());
 		if (!product.name) product.name = file.name.substring(0, file.name.lastIndexOf('.'));
 		useCustomImage = product.fileThumbnail !== undefined;
+	}
+
+	function cancel(force?: boolean) {
+		if (force) files = new DataTransfer().files;
+		else if (confirm('¿Estás seguro de que quieres cancelar?')) cancel(true);
 	}
 
 	$effect(() => {
@@ -159,8 +168,7 @@
 			{/each}
 		</section>
 		<div class="flex justify-end gap-2">
-			<!-- TODO: confirm before cancel -->
-			<Button variant="destructive" onclick={() => (product = undefined)}>Cancelar</Button>
+			<Button variant="destructive" onclick={() => cancel()}>Cancelar</Button>
 			<Button type="submit">Crear</Button>
 		</div>
 	{/if}
