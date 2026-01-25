@@ -93,7 +93,7 @@
 						Custom
 					</label>
 				</div>
-				<div class="flex grow flex-col gap-2 overflow-visible sm:overflow-hidden">
+				<div class="flex grow flex-col gap-2 overflow-hidden sm:overflow-visible">
 					<div class="contents">
 						<input
 							type="text"
