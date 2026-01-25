@@ -5,6 +5,7 @@
 	import { Button } from './ui/button';
 	import Input from './ui/input/input.svelte';
 	import ImageBlob from './image-blob.svelte';
+	import { enhance } from '$app/forms';
 
 	let files = $state<FileList>();
 	let product = $state<Awaited<ReturnType<typeof analyze3mfFile>>>();
@@ -53,26 +54,13 @@
 	$effect(() => {
 		if (files) analyzeFile();
 	});
-
-	// TODO: allow form to handle all of this
-	async function handleSubmit(event: SubmitEvent) {
-		event.preventDefault();
-		event.stopPropagation();
-		const formData = new FormData(event.target as HTMLFormElement);
-		console.log(Object.fromEntries(formData));
-		const response = await fetch('?/create', {
-			method: 'POST',
-			body: formData
-		});
-		console.log(response);
-	}
 </script>
 
 <form
 	action="?/create"
 	method="post"
 	enctype="multipart/form-data"
-	onsubmit={handleSubmit}
+	use:enhance
 	class="my-2 flex flex-col gap-2 rounded bg-primary-foreground p-2">
 	<Input type="file" name="file" id="file" accept=".3mf" bind:files />
 	{#if product}
