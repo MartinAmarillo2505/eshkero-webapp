@@ -128,3 +128,13 @@ export async function getProductFile(productId: string) {
 
   return row;
 }
+
+export async function getProductByFileSha1(sha1: string) {
+  const [row] = await db.select({ id: product.id, name: product.name })
+    .from(model)
+    .innerJoin(staticFile, eq(model.fileId, staticFile.id))
+    .innerJoin(product, eq(model.productId, product.id))
+    .where(eq(staticFile.sha1, sha1))
+    .limit(1);
+  return row;
+}

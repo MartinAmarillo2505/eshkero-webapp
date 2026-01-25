@@ -1,6 +1,7 @@
 import { analyze3mfFile } from "$lib/3mf";
-import { createProduct, searchProducts } from "$lib/server/products";
+import { createProduct, getProductByFileSha1, searchProducts } from "$lib/server/products";
 import { fail, type Actions } from "@sveltejs/kit";
+import { createHash } from "crypto";
 
 export async function load({ url }) {
   const query = url.searchParams.get('q') || undefined;
@@ -64,6 +65,9 @@ export const actions: Actions = {
     const thumbnail = useFileThumbnail === 'on' ? await _3mfFileThumbnail : await _3mfThumbnail;
     if (!thumbnail) return fail(400, { error: 'Thumbnail is required' });
 
+    const fileSha1 = createHash('sha1').update(Buffer.from(await file.arrayBuffer())).digest('hex');
+    const existingProduct = await getProductByFileSha1(fileSha1);
+    if (existingProduct) return fail(400, { error: `Product with this file already exists: ${existingProduct.name}` });
 
     const product = {
       file,
