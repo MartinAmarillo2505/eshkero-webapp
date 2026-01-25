@@ -33,7 +33,8 @@ export const product = pgTable('product', {
   )`)
 }, (table) => [
   check("product_price_check", sql`${table.price} IS NULL OR ${table.price} >= 0`),
-  index('idx_product_search_vector').using('gin', table.searchVector)
+  index('idx_product_search_vector').using('gin', table.searchVector),
+  index("idx_product_name_fuzzy").using('gist', table.name.op('gist_trgm_ops'))
 ]);
 
 export const model = pgTable('model', {

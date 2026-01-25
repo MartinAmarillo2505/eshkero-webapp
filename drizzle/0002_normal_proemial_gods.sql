@@ -1,0 +1,1 @@
+CREATE INDEX "idx_product_name_fuzzy" ON "product" USING gist ("name" gist_trgm_ops);

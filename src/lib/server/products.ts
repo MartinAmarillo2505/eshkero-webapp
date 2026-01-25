@@ -1,4 +1,4 @@
-import { aliasedTable, asc, desc, eq, sql } from "drizzle-orm";
+import { aliasedTable, asc, desc, eq, or, sql } from "drizzle-orm";
 import { db } from "./db";
 import { model, plate, product, staticFile } from "./db/schema";
 import { uploadFile, uploadOptimizedImage } from "./uploads";
@@ -61,6 +61,7 @@ export async function createProduct({ file, name, description, thumbnail, catego
 export async function searchProducts({ query, limit = 10, page = 1 }: { query?: string, limit?: number, page?: number }) {
   const tsQuery = sql`websearch_to_tsquery('spanish', ${query})`;
   const rankScore = sql<number>`ts_rank(${product.searchVector}, ${tsQuery})`;
+  const similarityScore = sql<number>`similarity(${product.name}, ${query})`;
 
   const rows = await db
     .select({
@@ -75,14 +76,14 @@ export async function searchProducts({ query, limit = 10, page = 1 }: { query?: 
       weightGrams: sql<number>`coalesce(${model.weightGrams}, sum(${plate.weightGrams}), 0)`,
     })
     .from(product)
-    .where(query ? sql`${product.searchVector} @@ ${tsQuery}` : sql`true`)
+    .where(query ? or(sql`${product.searchVector} @@ ${tsQuery}`, sql`${similarityScore} > 0`) : sql`true`)
     .limit(limit)
     .offset((page - 1) * limit)
-    .leftJoin(model, eq(product.id, model.productId))
+    .innerJoin(model, eq(product.id, model.productId))
     .leftJoin(plate, eq(model.id, plate.modelId))
-    .leftJoin(staticFile, eq(model.thumbnailId, staticFile.id))
+    .innerJoin(staticFile, eq(model.thumbnailId, staticFile.id))
     .groupBy(product.id, model.thumbnailId, staticFile.id, model.timeSeconds, model.weightGrams)
-    .orderBy(query ? desc(rankScore) : asc(product.name));
+    .orderBy(query ? desc(sql`${rankScore} + ${similarityScore}`) : asc(product.name));
 
   return rows.map(row => ({
     ...row, thumbnail: row.thumbnailSha1 ? `/uploads/${row.thumbnailSha1}` : null

@@ -8,6 +8,20 @@
       "when": 1769314345964,
       "tag": "0000_wild_lionheart",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1769356531764,
+      "tag": "0001_enable-pg_trgm-extension",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769356800800,
+      "tag": "0002_normal_proemial_gods",
+      "breakpoints": true
     }
   ]
 }
