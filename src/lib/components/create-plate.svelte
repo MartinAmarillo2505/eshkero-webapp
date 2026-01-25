@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Box, Clock, Weight } from 'lucide-svelte';
-	import ImageInput from './image-input.svelte';
+	import ImageBlob from './image-blob.svelte';
 
 	type Props = {
 		key: string;
@@ -36,10 +36,10 @@
 </script>
 
 <article class="flex gap-2">
-	<ImageInput
-		class="flex aspect-square w-16 shrink-0 grow-0 items-center rounded bg-input/30 object-cover sm:w-24"
-		bind:value={thumbnail}
-		required />
+	<div
+		class="flex aspect-square w-16 shrink-0 grow-0 items-center rounded bg-input/30 object-cover sm:w-24">
+		<ImageBlob class="w-full object-cover" src={thumbnail} alt={`Imagen de la placa ${key}`} />
+	</div>
 	<div class="flex flex-col justify-between gap-2">
 		<input
 			type="text"

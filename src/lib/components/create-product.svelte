@@ -4,7 +4,7 @@
 	import CreatePlate from './create-plate.svelte';
 	import { Button } from './ui/button';
 	import Input from './ui/input/input.svelte';
-	import ImageInput from './image-input.svelte';
+	import ImageBlob from './image-blob.svelte';
 
 	let files = $state<FileList>();
 	let product = $state<Awaited<ReturnType<typeof analyze3mfFile>>>();
@@ -79,10 +79,10 @@
 		<section class="mb-2 flex flex-wrap gap-2 p-2 sm:flex-nowrap">
 			<div class="flex w-full gap-2">
 				<div>
-					<ImageInput
-						class="flex aspect-square w-24 shrink-0 grow-0 items-center rounded bg-input/30 object-cover sm:w-32"
-						value={customImage}
-						required />
+					<div
+						class="flex aspect-square w-24 shrink-0 grow-0 items-center rounded bg-input/30 object-cover sm:w-32">
+						<ImageBlob class="w-full object-cover" src={customImage} alt="Imagen del producto" />
+					</div>
 					<label for="is-custom">
 						<input
 							type="checkbox"
