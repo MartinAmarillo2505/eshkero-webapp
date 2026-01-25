@@ -15,6 +15,9 @@ export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?:
 export const openFileInBambuStudio = (url: string | URL) => window.open(`bambustudio://open?file=${encodeURIComponent(url.toString())}`, '_self');
 export const formatTime = (seconds: number) => `${Math.floor(seconds / 60 / 60)}h ${Math.floor(seconds / 60 % 60)}m`;
 
+const numberFormatter = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export const formatPrice = (price: number) => numberFormatter.format(price);
+
 export type DeepPartial<T> = T extends Record<string, unknown> ? {
 	[P in keyof T]?: DeepPartial<T[P]>;
 } : T;

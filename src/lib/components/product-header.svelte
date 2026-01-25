@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { formatTime } from '$lib/utils';
+	import { formatPrice, formatTime } from '$lib/utils';
 	import { Clock, Download, Layers2, SquareArrowOutUpRight, Weight } from 'lucide-svelte';
 
 	type Props = {
@@ -55,7 +55,7 @@
 	</div>
 	<div
 		class="flex w-full flex-row-reverse items-center justify-between gap-2 sm:w-auto sm:flex-col sm:items-end">
-		<p class="p-2 text-3xl font-bold">${product.price.toFixed(2)}</p>
+		<p class="p-2 text-3xl font-bold">${formatPrice(product.price ?? 0)}</p>
 		<div class="flex gap-1 text-xs">
 			<Button class="cursor-pointer">
 				<SquareArrowOutUpRight size="1em" />
