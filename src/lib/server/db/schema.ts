@@ -28,8 +28,9 @@ export const product = pgTable('product', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 
   searchVector: tsvector('search_vector').notNull().generatedAlwaysAs(() => sql`(
-    setweight(to_tsvector('spanish', ${product.name}), 'A') ||
-    setweight(to_tsvector('spanish', ${product.description}), 'B')
+    setweight(to_tsvector('spanish', ${product.name}), 'A') || ' ' ||
+    setweight(to_tsvector('spanish', ${product.description}), 'B') || ' ' ||
+    setweight(to_tsvector('spanish', immutable_array_to_string(${product.categories}, ' ')), 'C')
   )`)
 }, (table) => [
   check("product_price_check", sql`${table.price} IS NULL OR ${table.price} >= 0`),

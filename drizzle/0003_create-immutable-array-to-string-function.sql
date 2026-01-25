@@ -1,0 +1,3 @@
+CREATE OR REPLACE FUNCTION immutable_array_to_string (arr TEXT [], sep TEXT) RETURNS text LANGUAGE SQL IMMUTABLE AS $$
+SELECT ARRAY_TO_STRING(arr, sep);
+$$;
