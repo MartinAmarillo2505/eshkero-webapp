@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { analyze3mfFile } from '$lib/3mf';
-	import { Clock, Layers2, Weight } from 'lucide-svelte';
+	import { Clock, Layers2, LoaderCircle, Weight } from 'lucide-svelte';
 	import CreatePlate from './create-plate.svelte';
 	import { Button } from './ui/button';
 	import Input from './ui/input/input.svelte';
@@ -8,6 +8,7 @@
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
 	import InputTag from './input-tag.svelte';
+	import type { SubmitFunction } from '@sveltejs/kit';
 
 	let files = $state<FileList>();
 	let product = $state<Awaited<ReturnType<typeof analyze3mfFile>>>();
@@ -57,20 +58,40 @@
 	}
 
 	function cancel(force?: boolean) {
-		if (force) files = new DataTransfer().files;
-		else if (confirm('¿Estás seguro de que quieres cancelar?')) cancel(true);
+		if (force) {
+			files = new DataTransfer().files;
+			error = undefined;
+		} else if (!confirm('¿Estás seguro de que quieres cancelar?')) cancel(true);
 	}
 
 	$effect(() => {
 		if (files) analyzeFile();
 	});
+
+	let submittingForm = $state(false);
+	let error = $state<string>();
+
+	const submit: SubmitFunction = ({}) => {
+		submittingForm = true;
+		error = undefined;
+		return async ({ result, update }) => {
+			submittingForm = false;
+			if (result.type === 'error') {
+				error = result.error?.message;
+			} else if (result.type == 'failure') {
+				error = JSON.stringify(result.data, null, 2);
+			} else {
+				await update();
+			}
+		};
+	};
 </script>
 
 <form
 	action="?/create"
 	method="post"
 	enctype="multipart/form-data"
-	use:enhance
+	use:enhance={submit}
 	class="my-2 flex flex-col gap-2 rounded bg-primary-foreground p-2">
 	<Input type="file" name="file" id="file" accept=".3mf" bind:files />
 	{#if product}
@@ -169,9 +190,23 @@
 				<CreatePlate {key} bind:plate={product.plates[key]} />
 			{/each}
 		</section>
-		<div class="flex justify-end gap-2">
-			<Button variant="destructive" onclick={() => cancel()}>Cancelar</Button>
-			<Button type="submit">Crear</Button>
+		<div class="flex justify-between gap-2">
+			<div class="flex items-center">
+				{#if error}
+					<p class="text-red-400">Error al crear el producto: {error}</p>
+				{/if}
+			</div>
+			<div class="flex gap-2">
+				<Button variant="destructive" onclick={() => cancel()} disabled={submittingForm}>
+					Cancelar
+				</Button>
+				<Button type="submit" disabled={submittingForm}>
+					{#if submittingForm}
+						<LoaderCircle size="1em" class="animate-spin" />
+					{/if}
+					Crear
+				</Button>
+			</div>
 		</div>
 	{/if}
 </form>
