@@ -76,7 +76,7 @@ export const actions: Actions = {
       name: _3mf.name || name,
       description,
       thumbnail,
-      categories: categories?.split(' ') || [],
+      categories: categories?.split(' ').filter(str => str.trim() !== '') || [],
       price: Number(price) || undefined,
       timeSeconds: totalTimeSeconds,
       weightGrams: totalWeightGrams,
