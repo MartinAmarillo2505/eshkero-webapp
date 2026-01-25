@@ -38,6 +38,8 @@ export const actions: Actions = {
     const description = formData.get('description') as string | null;
     if (description === null) return fail(400, { error: 'Description is required' });
 
+    const categories = formData.get("categories") as string | null;
+
     const price = formData.get('price') as string | null;
     if (price === null) return fail(400, { error: 'Price is required' });
 
@@ -68,7 +70,7 @@ export const actions: Actions = {
       name: _3mf.name || name,
       description,
       thumbnail,
-      categories: [], // TODO: categories
+      categories: categories?.split(' ') || [],
       price: Number(price) || undefined,
       timeSeconds: totalTimeSeconds,
       weightGrams: totalWeightGrams,

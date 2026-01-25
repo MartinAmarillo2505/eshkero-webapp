@@ -7,6 +7,7 @@
 	import ImageBlob from './image-blob.svelte';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
+	import InputTag from './input-tag.svelte';
 
 	let files = $state<FileList>();
 	let product = $state<Awaited<ReturnType<typeof analyze3mfFile>>>();
@@ -105,6 +106,7 @@
 							class="line-clamp-2 h-[2lh] resize-none bg-input/30 text-wrap whitespace-break-spaces"
 							name="description"
 							autocomplete="off"></textarea>
+						<InputTag placeholder="Agregar categorías..." name="categories" />
 					</div>
 					<p class="sm:text-md flex gap-2 text-sm text-nowrap">
 						<span class="flex items-center gap-0.5">
