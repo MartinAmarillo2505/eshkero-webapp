@@ -6,6 +6,8 @@
 	import { page } from '$app/state';
 
 	type Props = {
+		latestModel: boolean;
+
 		id: string;
 		name: string;
 		description: string;
@@ -20,11 +22,13 @@
 		weightGrams: number;
 	};
 
-	let product: Props = $props();
+	let { latestModel, ...product }: Props = $props();
 
-	const downloadUrl = new URL(`/uploads/${product.fileSha1}/${product.fileName}`, page.url.origin);
-	const downloadFile = () => window.open(downloadUrl, '_self');
-	const openFile = () => openFileInBambuStudio(downloadUrl);
+	const downloadUrl = $derived(
+		new URL(`/uploads/${product.fileSha1}/${product.fileName}`, page.url.origin)
+	);
+	const downloadFile = $derived(() => window.open(downloadUrl, '_self'));
+	const openFile = $derived(() => openFileInBambuStudio(downloadUrl));
 </script>
 
 <section class="mb-2 flex flex-wrap gap-2 rounded bg-secondary p-2 md:flex-nowrap">
@@ -35,7 +39,14 @@
 			alt={`Imagen del producto ${product.name}`} />
 		<div class="flex flex-col justify-between gap-2">
 			<div>
-				<h1 class="text-xl font-bold">{product.name}</h1>
+				<h1 class="flex items-center gap-2 text-xl font-bold">
+					{product.name}
+					{#if latestModel}
+						<Badge variant="outline" class="border-green-500 text-green-500">Actual</Badge>
+					{:else}
+						<Badge variant="outline" class="border-amber-500 text-amber-500">Viejo</Badge>
+					{/if}
+				</h1>
 				<p class="line-clamp-2 text-wrap whitespace-break-spaces">{product.description}</p>
 			</div>
 			<div>

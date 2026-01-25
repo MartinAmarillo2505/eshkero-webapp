@@ -1,4 +1,4 @@
-import { aliasedTable, asc, desc, eq, or, sql } from "drizzle-orm";
+import { aliasedTable, and, asc, desc, eq, or, sql } from "drizzle-orm";
 import { db } from "./db";
 import { model, plate, product, staticFile } from "./db/schema";
 import { uploadFile, uploadOptimizedImage } from "./uploads";
@@ -90,7 +90,7 @@ export async function searchProducts({ query, limit = 10, page = 1 }: { query?: 
   }));
 }
 
-export async function getProductById(id: string) {
+export async function getProductById(id: string, modelId?: string) {
   const thumbnailTable = aliasedTable(staticFile, "thumbnail_file");
   const fileTable = aliasedTable(staticFile, "file_file");
 
@@ -108,7 +108,7 @@ export async function getProductById(id: string) {
     plateCount: sql<number>`coalesce(count(${plate.modelId}), 0)`,
   }).from(product).where(eq(product.id, id))
     .innerJoinLateral(db.select().from(model)
-      .where(eq(product.id, model.productId))
+      .where(and(eq(product.id, model.productId), modelId ? eq(model.id, modelId) : undefined))
       .orderBy(desc(model.createdAt)).limit(1)
       .as("model"), eq(product.id, model.productId))
     .leftJoin(plate, eq(model.id, plate.modelId))
