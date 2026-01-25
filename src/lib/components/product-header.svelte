@@ -1,33 +1,52 @@
 <script lang="ts">
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { formatTime } from '$lib/utils';
+	import { formatPrice, formatTime, openFileInBambuStudio } from '$lib/utils';
 	import { Clock, Download, Layers2, SquareArrowOutUpRight, Weight } from 'lucide-svelte';
+	import { page } from '$app/state';
 
 	type Props = {
+		latestModel: boolean;
+
 		id: string;
 		name: string;
 		description: string;
+		thumbnailSha1: string;
+		fileSha1: string;
+		fileName: string | null;
 		categories: string[];
-		price: number;
+		price: number | null;
 
 		plateCount: number;
 		timeSeconds: number;
 		weightGrams: number;
 	};
 
-	let product: Props = $props();
+	let { latestModel, ...product }: Props = $props();
+
+	const downloadUrl = $derived(
+		new URL(`/uploads/${product.fileSha1}/${product.fileName}`, page.url.origin)
+	);
+	const downloadFile = $derived(() => window.open(downloadUrl, '_self'));
+	const openFile = $derived(() => openFileInBambuStudio(downloadUrl));
 </script>
 
-<section class="mb-2 flex flex-wrap gap-2 rounded bg-secondary p-2">
-	<div class="flex grow gap-2">
+<section class="mb-2 flex flex-wrap gap-2 rounded bg-secondary p-2 md:flex-nowrap">
+	<div class="flex grow gap-2 overflow-auto">
 		<img
-			src="https://placehold.co/500x500/png"
+			src={`/uploads/${product.thumbnailSha1}`}
 			class="aspect-square w-32 rounded object-cover"
 			alt={`Imagen del producto ${product.name}`} />
 		<div class="flex flex-col justify-between gap-2">
 			<div>
-				<h1 class="text-xl font-bold">{product.name}</h1>
+				<h1 class="flex items-center gap-2 text-xl font-bold">
+					{product.name}
+					{#if latestModel}
+						<Badge variant="outline" class="border-green-500 text-green-500">Actual</Badge>
+					{:else}
+						<Badge variant="outline" class="border-amber-500 text-amber-500">Viejo</Badge>
+					{/if}
+				</h1>
 				<p class="line-clamp-2 text-wrap whitespace-break-spaces">{product.description}</p>
 			</div>
 			<div>
@@ -54,14 +73,14 @@
 		</div>
 	</div>
 	<div
-		class="flex w-full flex-row-reverse items-center justify-between gap-2 sm:w-auto sm:flex-col sm:items-end">
-		<p class="p-2 text-3xl font-bold">${product.price.toFixed(2)}</p>
+		class="flex w-full flex-row-reverse items-center justify-between gap-2 md:w-auto md:flex-col md:items-end">
+		<p class="p-2 text-3xl font-bold">${formatPrice(product.price ?? 0)}</p>
 		<div class="flex gap-1 text-xs">
-			<Button class="cursor-pointer">
+			<Button class="cursor-pointer" onclick={openFile}>
 				<SquareArrowOutUpRight size="1em" />
 				<span class="hidden sm:block"> Abrir</span>
 			</Button>
-			<Button class="cursor-pointer">
+			<Button class="cursor-pointer" onclick={downloadFile}>
 				<Download size="1em" />
 				<span class="hidden sm:block"> Descargar</span>
 			</Button>

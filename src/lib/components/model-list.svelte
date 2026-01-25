@@ -4,10 +4,12 @@
 	import { Clock, Layers2, Weight } from 'lucide-svelte';
 
 	type Props = {
+		productId: string;
 		models: {
 			id: string;
 			versionName: string;
 			versionNotes: string;
+			thumbnailSha1: string;
 			createdAt: Date;
 
 			plateCount: number;
@@ -16,7 +18,7 @@
 		}[];
 	};
 
-	let { models }: Props = $props();
+	let { productId, models }: Props = $props();
 </script>
 
 <section class="rounded bg-secondary p-2">
@@ -28,12 +30,16 @@
 				<picture class="flex items-center">
 					<img
 						class="aspect-square w-24 min-w-24 rounded object-cover"
-						src="https://placehold.co/500x500/png"
+						src={`/uploads/${model.thumbnailSha1}`}
+						loading="lazy"
 						alt={`Imagen del modelo ${model.versionName}`} />
 				</picture>
 				<div class="flex grow flex-col justify-between gap-1">
 					<div class="line-clamp-4">
-						<h3 class="font-bold">{model.versionName}</h3>
+						<h3 class="font-bold">
+							<a href={`/products/${productId}/${model.id}`} class="hover:underline"
+								>{model.versionName}</a>
+						</h3>
 						<p class="text-sm whitespace-break-spaces text-secondary-foreground">
 							{model.versionNotes}
 						</p>

@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1769314345964,
+      "tag": "0000_wild_lionheart",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1769356531764,
+      "tag": "0001_enable-pg_trgm-extension",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769356800800,
+      "tag": "0002_normal_proemial_gods",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1769373281586,
+      "tag": "0003_create-immutable-array-to-string-function",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1769373844467,
+      "tag": "0004_typical_tenebrous",
+      "breakpoints": true
+    }
+  ]
+}
