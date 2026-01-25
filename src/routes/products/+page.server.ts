@@ -1,41 +1,24 @@
 import { analyze3mfFile } from "$lib/3mf";
-import models from "$lib/data/models";
-import plates from "$lib/data/plates";
-import products from "$lib/data/products";
-import { deepMerge } from "$lib/utils";
+import { createProduct, searchProducts } from "$lib/server/products";
 import { fail, type Actions } from "@sveltejs/kit";
 
-export async function load() {
-  return {
-    products: products.map(product => {
-      const model = models.filter(model => model.productId === product.id).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).at(0);
-      const modelPlates = plates.filter(plate => plate.modelId === model?.id);
-
-      const plateCount = modelPlates.length;
-      const timeSeconds = modelPlates.reduce((acc, plate) => acc + plate.timeSeconds, 0);
-      const weightGrams = modelPlates.reduce((acc, plate) => acc + plate.weightGrams, 0);
-
-      return {
-        ...product,
-        plateCount,
-        timeSeconds,
-        weightGrams
-      }
-    })
-  };
+export async function load({ url }) {
+  const query = url.searchParams.get('q') || undefined;
+  return { products: await searchProducts({ query }) }
 }
 
 function getPlates(formData: FormData) {
-  const plates: Record<string, { name: string, timeSeconds: number, weightGrams: number }> = {}
+  const plates: Record<string, { name: string, timeSeconds: number, weightGrams: number, filaments: Record<string, { color: string, type: string }> }> = {}
 
   for (const [key, value] of formData.entries()) {
     const match = key.match(/^plate\[(\d+)\]\[(\w+)\]$/);
     if (match) {
       const [index, field] = match.slice(1);
-      plates[index] ??= { name: '', timeSeconds: 0, weightGrams: 0 };
+      plates[index] ??= { name: '', timeSeconds: 0, weightGrams: 0, filaments: {} };
       if (field === 'name') plates[index][field] = value as string;
       else if (field === 'timeSeconds') plates[index][field] = Number(value) || 0;
       else if (field === 'weightGrams') plates[index][field] = Number(value) || 0;
+      else if (field === 'filaments') plates[index][field] = JSON.parse(value as string);
     }
   }
 
@@ -76,12 +59,26 @@ export const actions: Actions = {
     const useFileThumbnail = formData.get('useFileThumbnail') as string | null;
 
     const { thumbnail: _3mfThumbnail, fileThumbnail: _3mfFileThumbnail, ..._3mf } = await analyze3mfFile(await file.arrayBuffer());
-    const thumbnail = useFileThumbnail === 'on' ? _3mfFileThumbnail : _3mfThumbnail;
+    const thumbnail = useFileThumbnail === 'on' ? await _3mfFileThumbnail : await _3mfThumbnail;
     if (!thumbnail) return fail(400, { error: 'Thumbnail is required' });
 
-    const product = deepMerge(_3mf, { name, description, thumbnail, price: Number(price) || null, totalTimeSeconds, totalWeightGrams, plates });
 
-    console.log(product);
+    const product = {
+      file,
+      name: _3mf.name || name,
+      description,
+      thumbnail,
+      categories: [], // TODO: categories
+      price: Number(price) || undefined,
+      timeSeconds: totalTimeSeconds,
+      weightGrams: totalWeightGrams,
+      plates: await Promise.all(Object.entries(plates).map(async ([k, v]) => {
+        const plate = { ..._3mf.plates[k], ...v };
+        return { ...plate, thumbnail: await plate.thumbnail!, filaments: Object.values(plate.filaments) }
+      }))
+    };
+
+    await createProduct(product);
 
     return { success: true };
   }
