@@ -1,16 +1,19 @@
 <script lang="ts">
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { formatPrice, formatTime } from '$lib/utils';
+	import { formatPrice, formatTime, openFileInBambuStudio } from '$lib/utils';
 	import { Clock, Download, Layers2, SquareArrowOutUpRight, Weight } from 'lucide-svelte';
+	import { page } from '$app/state';
 
 	type Props = {
 		id: string;
 		name: string;
 		description: string;
 		thumbnailSha1: string;
+		fileSha1: string;
+		fileName: string | null;
 		categories: string[];
-		price: number;
+		price: number | null;
 
 		plateCount: number;
 		timeSeconds: number;
@@ -18,6 +21,10 @@
 	};
 
 	let product: Props = $props();
+
+	const downloadUrl = new URL(`/uploads/${product.fileSha1}/${product.fileName}`, page.url.origin);
+	const downloadFile = () => window.open(downloadUrl, '_self');
+	const openFile = () => openFileInBambuStudio(downloadUrl);
 </script>
 
 <section class="mb-2 flex flex-wrap gap-2 rounded bg-secondary p-2">
@@ -58,11 +65,11 @@
 		class="flex w-full flex-row-reverse items-center justify-between gap-2 sm:w-auto sm:flex-col sm:items-end">
 		<p class="p-2 text-3xl font-bold">${formatPrice(product.price ?? 0)}</p>
 		<div class="flex gap-1 text-xs">
-			<Button class="cursor-pointer">
+			<Button class="cursor-pointer" onclick={openFile}>
 				<SquareArrowOutUpRight size="1em" />
 				<span class="hidden sm:block"> Abrir</span>
 			</Button>
-			<Button class="cursor-pointer">
+			<Button class="cursor-pointer" onclick={downloadFile}>
 				<Download size="1em" />
 				<span class="hidden sm:block"> Descargar</span>
 			</Button>
