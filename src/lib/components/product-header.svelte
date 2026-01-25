@@ -27,7 +27,7 @@
 	const openFile = () => openFileInBambuStudio(downloadUrl);
 </script>
 
-<section class="mb-2 flex flex-wrap gap-2 rounded bg-secondary p-2">
+<section class="mb-2 flex flex-wrap gap-2 rounded bg-secondary p-2 md:flex-nowrap">
 	<div class="flex grow gap-2">
 		<img
 			src={`/uploads/${product.thumbnailSha1}`}
@@ -62,7 +62,7 @@
 		</div>
 	</div>
 	<div
-		class="flex w-full flex-row-reverse items-center justify-between gap-2 sm:w-auto sm:flex-col sm:items-end">
+		class="flex w-full flex-row-reverse items-center justify-between gap-2 md:w-auto md:flex-col md:items-end">
 		<p class="p-2 text-3xl font-bold">${formatPrice(product.price ?? 0)}</p>
 		<div class="flex gap-1 text-xs">
 			<Button class="cursor-pointer" onclick={openFile}>
