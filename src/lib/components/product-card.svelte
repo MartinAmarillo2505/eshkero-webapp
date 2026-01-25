@@ -7,8 +7,9 @@
 		id: string;
 		name: string;
 		description: string;
+		thumbnailSha1: string;
 		categories: string[];
-		price: number;
+		price: number | null;
 
 		plateCount: number;
 		timeSeconds: number;
@@ -23,8 +24,9 @@
 	<div>
 		<a href={`/products/${product.id}`}>
 			<img
-				src="https://placehold.co/500x500/png"
+				src={`/uploads/${product.thumbnailSha1}`}
 				class="aspect-square w-full rounded-lg object-cover"
+				loading="lazy"
 				alt={`Imagen del producto ${product.name}`} />
 			<h3 class="line-clamp-1 text-xl font-bold hover:underline">{product.name}</h3>
 		</a>

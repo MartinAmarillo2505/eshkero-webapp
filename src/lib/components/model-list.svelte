@@ -8,6 +8,7 @@
 			id: string;
 			versionName: string;
 			versionNotes: string;
+			thumbnailSha1: string;
 			createdAt: Date;
 
 			plateCount: number;
@@ -28,7 +29,8 @@
 				<picture class="flex items-center">
 					<img
 						class="aspect-square w-24 min-w-24 rounded object-cover"
-						src="https://placehold.co/500x500/png"
+						src={`/uploads/${model.thumbnailSha1}`}
+						loading="lazy"
 						alt={`Imagen del modelo ${model.versionName}`} />
 				</picture>
 				<div class="flex grow flex-col justify-between gap-1">

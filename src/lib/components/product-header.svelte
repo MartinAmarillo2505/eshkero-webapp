@@ -8,6 +8,7 @@
 		id: string;
 		name: string;
 		description: string;
+		thumbnailSha1: string;
 		categories: string[];
 		price: number;
 
@@ -22,7 +23,7 @@
 <section class="mb-2 flex flex-wrap gap-2 rounded bg-secondary p-2">
 	<div class="flex grow gap-2">
 		<img
-			src="https://placehold.co/500x500/png"
+			src={`/uploads/${product.thumbnailSha1}`}
 			class="aspect-square w-32 rounded object-cover"
 			alt={`Imagen del producto ${product.name}`} />
 		<div class="flex flex-col justify-between gap-2">

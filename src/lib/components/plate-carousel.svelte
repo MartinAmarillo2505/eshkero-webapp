@@ -7,6 +7,7 @@
 		plates: {
 			id: string;
 			name: string;
+			thumbnailSha1: string;
 			objects: number;
 			timeSeconds: number;
 			weightGrams: number;
@@ -24,7 +25,8 @@
 				<Carousel.Item class="basis-auto">
 					<img
 						class="aspect-square w-32 rounded object-cover"
-						src="https://placehold.co/500x500/png"
+					src={`/uploads/${plate.thumbnailSha1}`}
+					loading="lazy"
 						alt={`Imagen de la placa ${plate.name}`} />
 					<p class="font-bold">{plate.name}</p>
 					<p class="flex gap-2 text-xs text-nowrap">
