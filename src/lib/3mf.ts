@@ -1,3 +1,4 @@
+import jsdom from 'jsdom';
 import JSZip from 'jszip';
 import { deepMerge, type DeepPartial } from './utils';
 
@@ -21,6 +22,14 @@ type _3mfFile = {
 	}>;
 };
 
+function xmlToDoc(xml: string) {
+	if (typeof window !== 'undefined') {
+		return new DOMParser().parseFromString(xml, 'text/xml');
+	}
+	const dom = new jsdom.JSDOM(xml, { contentType: 'text/xml' });
+	return dom.window.document;
+}
+
 async function read3mfThumbnail(zip: JSZip): Promise<DeepPartial<_3mfFile>> {
 	const zipFile = zip.file("Auxiliaries/.thumbnails/thumbnail_middle.png") ?? zip.file("Auxiliaries/.thumbnails/thumbnail_3mf.png");
 	const fileThumbnail = zipFile?.async('blob')?.then(blob => new File([blob], zipFile.name, { type: `image/${zipFile.name.split('.').pop()}` }));
@@ -31,7 +40,7 @@ async function read3dModel(zip: JSZip): Promise<DeepPartial<_3mfFile>> {
 	const zipFile = zip.file('3D/3dmodel.model');
 	if (!zipFile) return {};
 
-	const doc = new DOMParser().parseFromString(await zipFile.async('text'), 'text/xml');
+	const doc = xmlToDoc(await zipFile.async('text'));
 	const model = doc.querySelector('model');
 	const name = model?.querySelector('metadata[name="Title"]')?.textContent ?? '';
 	const thumbnail_file = model?.querySelector('metadata[name="Thumbnail_Middle"]')?.textContent ?? '';
@@ -44,7 +53,7 @@ async function readModelSettings(zip: JSZip): Promise<DeepPartial<_3mfFile>> {
 	const zipFile = zip.file('Metadata/model_settings.config');
 	if (!zipFile) return {};
 
-	const doc = new DOMParser().parseFromString(await zipFile.async('text'), 'text/xml');
+	const doc = xmlToDoc(await zipFile.async('text'));
 
 	const plates = Object.fromEntries(await Promise.all(doc.querySelectorAll('config > plate').values().map(async plate => {
 		const id = plate.querySelector('metadata[key=plater_id]')?.getAttribute('value') ?? '';
@@ -63,7 +72,7 @@ async function readSliceInfo(zip: JSZip): Promise<DeepPartial<_3mfFile>> {
 	const zipFile = zip.file('Metadata/slice_info.config');
 	if (!zipFile) return {};
 
-	const doc = new DOMParser().parseFromString(await zipFile.async('text'), 'text/xml');
+	const doc = xmlToDoc(await zipFile.async('text'));
 
 	const plates = Object.fromEntries(doc.querySelectorAll('config > plate').values().map(plate => {
 		const id = plate.querySelector("metadata[key=index]")?.getAttribute('value') ?? '';
