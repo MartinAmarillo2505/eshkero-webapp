@@ -28,9 +28,13 @@
 				class="aspect-square w-full rounded-lg object-cover"
 				loading="lazy"
 				alt={`Imagen del producto ${product.name}`} />
-			<h3 class="line-clamp-1 text-xl font-bold hover:underline">{product.name}</h3>
+			<h3 class="line-clamp-1 text-xl font-bold hover:underline" title={product.name}>
+				{product.name}
+			</h3>
 		</a>
-		<p class="line-clamp-2 text-wrap whitespace-break-spaces">{product.description}</p>
+		<p class="line-clamp-2 text-wrap whitespace-break-spaces" title={product.description}>
+			{product.description}
+		</p>
 	</div>
 	<div>
 		<p class="pt-2 text-lg font-bold">${formatPrice(product.price ?? 0)}</p>

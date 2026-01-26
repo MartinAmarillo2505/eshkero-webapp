@@ -39,7 +39,7 @@
 			alt={`Imagen del producto ${product.name}`} />
 		<div class="flex flex-col justify-between gap-2">
 			<div>
-				<h1 class="flex items-center gap-2 text-xl font-bold">
+				<h1 class="flex items-center gap-2 text-xl font-bold" title={product.name}>
 					{product.name}
 					{#if latestModel}
 						<Badge variant="outline" class="border-green-500 text-green-500">Actual</Badge>
@@ -47,7 +47,9 @@
 						<Badge variant="outline" class="border-amber-500 text-amber-500">Viejo</Badge>
 					{/if}
 				</h1>
-				<p class="line-clamp-2 text-wrap whitespace-break-spaces">{product.description}</p>
+				<p class="line-clamp-2 text-wrap whitespace-break-spaces" title={product.description}>
+					{product.description}
+				</p>
 			</div>
 			<div>
 				<div class="mb-2 flex h-[1em] gap-1">
