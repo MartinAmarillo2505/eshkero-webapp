@@ -18,16 +18,21 @@
 
 <section class="mb-2 rounded bg-secondary p-2">
 	<h1 class="text-xl font-bold">Placas</h1>
-	<section class="flex gap-4 overflow-x-auto rounded bg-primary-foreground p-2">
+	<section class="flex min-h-44 gap-4 overflow-x-auto rounded bg-primary-foreground p-2">
+		{#if plates.length === 0}
+			<p class="flex grow items-center justify-around">No hay placas</p>
+		{/if}
 		{#each plates as plate, index}
-			<article class="flex basis-auto flex-col justify-between">
+			<article class="flex w-32 basis-auto flex-col justify-between">
 				<div>
 					<img
 						class="aspect-square w-32 rounded object-cover"
 						src={`/uploads/${plate.thumbnailSha1}`}
 						loading="lazy"
-						alt={`Imagen de la placa ${plate.name}`} />
-					<p class="font-bold">{plate.name || `Placa ${index + 1}`}</p>
+						alt={`Imagen de la placa ${plate.name || `Placa ${index + 1}`}`} />
+					<p class="line-clamp-2 font-bold" title={plate.name || `Placa ${index + 1}`}>
+						{plate.name || `Placa ${index + 1}`}
+					</p>
 				</div>
 				<p class="flex gap-2 text-xs text-nowrap">
 					<span class="flex items-center gap-0.5">
