@@ -4,16 +4,18 @@
 
 	type Props = {
 		key: string;
+		filaments: Record<string, { color: string; type: string }>;
 		plate: {
 			name: string;
 			thumbnail: Promise<File> | undefined;
 			objects: number;
+			filaments: string[];
 			timeSeconds?: number;
 			weightGrams?: number;
 		};
 	};
 
-	let { key, plate = $bindable() }: Props = $props();
+	let { key, filaments, plate = $bindable() }: Props = $props();
 
 	let thumbnail = $state<File>();
 
@@ -48,6 +50,15 @@
 			name={`plate[${key}][name]`}
 			value={plate.name}
 			autocomplete="off" />
+		<div class="flex gap-1">
+			{#each plate.filaments.map((id) => filaments[id]) as { color, type }}
+				<div
+					class="h-4 w-4 border border-white"
+					style="background-color: {color}"
+					title={`Filamento ${type}`}>
+				</div>
+			{/each}
+		</div>
 		<p class="sm:text-md flex gap-2 text-sm text-nowrap">
 			<span class="flex items-center gap-0.5">
 				<Box size="1em" />

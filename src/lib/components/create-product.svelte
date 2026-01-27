@@ -190,7 +190,7 @@
 		<section
 			class="grid grid-cols-[repeat(auto-fill,400px)] justify-evenly gap-2 overflow-hidden p-2">
 			{#each Object.keys(product.plates) as key}
-				<CreatePlate {key} bind:plate={product.plates[key]} />
+				<CreatePlate {key} filaments={product.filaments} bind:plate={product.plates[key]} />
 			{/each}
 		</section>
 		<div class="flex justify-between gap-2">
