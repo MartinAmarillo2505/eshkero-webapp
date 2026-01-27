@@ -63,7 +63,7 @@ export async function searchProducts({ query, limit = 10, page = 1 }: { query?: 
   const rankScore = sql<number>`ts_rank(${product.searchVector}, ${tsQuery})`;
   const similarityScore = sql<number>`similarity(${product.name}, ${query})`;
 
-  const rows = await db
+  return db
     .select({
       id: product.id,
       name: product.name,
@@ -84,10 +84,6 @@ export async function searchProducts({ query, limit = 10, page = 1 }: { query?: 
     .innerJoin(staticFile, eq(model.thumbnailId, staticFile.id))
     .groupBy(product.id, model.thumbnailId, staticFile.id, model.timeSeconds, model.weightGrams)
     .orderBy(query ? desc(sql`${rankScore} + ${similarityScore}`) : asc(product.name));
-
-  return rows.map(row => ({
-    ...row, thumbnail: row.thumbnailSha1 ? `/uploads/${row.thumbnailSha1}` : null
-  }));
 }
 
 export async function getProductById(id: string, modelId?: string) {
