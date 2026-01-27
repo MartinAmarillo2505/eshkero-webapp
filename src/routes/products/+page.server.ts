@@ -9,17 +9,16 @@ export async function load({ url }) {
 }
 
 function getPlates(formData: FormData) {
-  const plates: Record<string, { name: string, timeSeconds: number, weightGrams: number, filaments: Record<string, { color: string, type: string }> }> = {}
+  const plates: Record<string, { name: string, timeSeconds: number, weightGrams: number }> = {}
 
   for (const [key, value] of formData.entries()) {
     const match = key.match(/^plate\[(\d+)\]\[(\w+)\]$/);
     if (match) {
       const [index, field] = match.slice(1);
-      plates[index] ??= { name: '', timeSeconds: 0, weightGrams: 0, filaments: {} };
+      plates[index] ??= { name: '', timeSeconds: 0, weightGrams: 0 };
       if (field === 'name') plates[index][field] = value as string;
       else if (field === 'timeSeconds') plates[index][field] = Number(value) || 0;
       else if (field === 'weightGrams') plates[index][field] = Number(value) || 0;
-      else if (field === 'filaments') plates[index][field] = JSON.parse(value as string);
     }
   }
 
@@ -82,7 +81,7 @@ export const actions: Actions = {
       weightGrams: totalWeightGrams,
       plates: await Promise.all(Object.entries(plates).map(async ([k, v]) => {
         const plate = { ..._3mf.plates[k], ...v };
-        return { ...plate, thumbnail: await plate.thumbnail!, filaments: Object.values(plate.filaments) }
+        return { ...plate, thumbnail: await plate.thumbnail!, filaments: plate.filaments.map(id => _3mf.filaments[id]) }
       }))
     };
 

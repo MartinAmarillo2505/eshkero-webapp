@@ -6,16 +6,17 @@ type _3mfFile = {
 	name: string;
 	fileThumbnail: Promise<File> | undefined;
 	thumbnail: Promise<File> | undefined;
+	filaments: {
+		[k: string]: {
+			color: string;
+			type: string;
+		}
+	};
 	plates: Record<string, {
 		name: string;
 		thumbnail: Promise<File> | undefined;
 		objects: number;
-		filaments: {
-			[k: string]: {
-				color: string;
-				type: string;
-			}
-		};
+		filaments: string[];
 
 		timeSeconds?: number;
 		weightGrams?: number;
@@ -49,6 +50,19 @@ async function read3dModel(zip: JSZip): Promise<DeepPartial<_3mfFile>> {
 	return { name, thumbnail };
 }
 
+async function readProjectSettings(zip: JSZip): Promise<DeepPartial<_3mfFile>> {
+	const zipFile = zip.file('Metadata/project_settings.config');
+	if (!zipFile) return {};
+
+	const doc = JSON.parse(await zipFile.async('text'));
+	const filamentSelfIndex = doc["filament_self_index"] as string[];
+	const filamentTypes = doc["filament_type"] as string[];
+	const filamentColors = doc["filament_colour"] as string[];
+
+	const filaments = Object.fromEntries(filamentSelfIndex.map((selfIndex, i) => ([selfIndex, { color: filamentColors[i], type: filamentTypes[i] }])));
+	return { filaments };
+}
+
 async function readModelSettings(zip: JSZip): Promise<DeepPartial<_3mfFile>> {
 	const zipFile = zip.file('Metadata/model_settings.config');
 	if (!zipFile) return {};
@@ -62,8 +76,19 @@ async function readModelSettings(zip: JSZip): Promise<DeepPartial<_3mfFile>> {
 		const thumbnail = (thumbnail_file ? zip.file(thumbnail_file)?.async('blob') : undefined)?.then(blob => new File([blob], thumbnail_file, { type: `image/${thumbnail_file.split('.').pop()}` }));
 		const gcodeFile = plate.querySelector('metadata[key=gcode_file]')?.getAttribute('value') ?? undefined;
 		const objects = plate.querySelectorAll('model_instance').length;
-		// TODO: filaments
-		return [id, { name, thumbnail, objects, ...(gcodeFile ? await readGcodeInfo(zip, gcodeFile) : {}) }]
+		const filaments = [...new Set(plate.querySelectorAll('model_instance > metadata[key=object_id]').values().map(metadata => {
+			const objectId = metadata.getAttribute('value');
+			const object = doc.querySelector(`config > object[id="${objectId}"]`);
+			const filaments = [];
+			const objectExtruder = object?.querySelector('metadata[key=extruder]')?.getAttribute('value');
+			if (objectExtruder) filaments.push(objectExtruder);
+			object?.querySelectorAll('part > metadata[key=extruder]').forEach(metadata => {
+				const extruder = metadata.getAttribute('value');
+				if (extruder) filaments.push(extruder);
+			});
+			return filaments;
+		}).toArray().flat())];
+		return [id, { name, thumbnail, objects, filaments, ...(gcodeFile ? await readGcodeInfo(zip, gcodeFile) : {}) }]
 	})));
 	return { plates }
 }
@@ -74,21 +99,25 @@ async function readSliceInfo(zip: JSZip): Promise<DeepPartial<_3mfFile>> {
 
 	const doc = xmlToDoc(await zipFile.async('text'));
 
+	const filaments: Record<string, { color: string, type: string }> = {};
 	const plates = Object.fromEntries(doc.querySelectorAll('config > plate').values().map(plate => {
 		const id = plate.querySelector("metadata[key=index]")?.getAttribute('value') ?? '';
 		const weightGramsStr = plate.querySelector("metadata[key=weight]")?.getAttribute('value') ?? undefined;
 		const weightGrams = weightGramsStr === undefined ? undefined : parseFloat(weightGramsStr);
 		const objects = plate.querySelectorAll('object').length;
-		const filaments = Object.fromEntries(plate.querySelectorAll('filament').values().map(filament => {
+
+		const filamentIds = [];
+		for (const filament of plate.querySelectorAll('filament').values()) {
 			const id = filament.getAttribute('id') ?? '';
 			const color = filament.getAttribute('color') ?? '';
 			const type = filament.getAttribute('type') ?? '';
-			return [id, { color, type }]
-		}));
-		return [id, { ...(weightGrams ? { weightGrams } : {}), objects, filaments }]
+			filaments[id] = { color, type };
+			filamentIds.push(id);
+		}
+		return [id, { ...(weightGrams ? { weightGrams } : {}), objects, filaments: filamentIds }]
 	}));
 
-	return { plates };
+	return { filaments, plates };
 }
 
 async function readGcodeInfo(zip: JSZip, gcodePath: string): Promise<DeepPartial<_3mfFile['plates'][number]>> {
@@ -120,8 +149,9 @@ export async function analyze3mfFile(data: ArrayBuffer): Promise<_3mfFile> {
 
 	const thumb = await read3mfThumbnail(zip);
 	const _3dModel = await read3dModel(zip);
+	const projectSettings = await readProjectSettings(zip);
 	const modelSettings = await readModelSettings(zip);
 	const sliceInfo = await readSliceInfo(zip);
 
-	return [thumb, _3dModel, modelSettings, sliceInfo].reduce(deepMerge) as _3mfFile;
+	return [thumb, _3dModel, projectSettings, modelSettings, sliceInfo].reduce(deepMerge) as _3mfFile;
 }
