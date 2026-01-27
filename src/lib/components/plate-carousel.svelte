@@ -7,6 +7,7 @@
 			id: string;
 			name: string;
 			thumbnailSha1: string;
+			filaments: { color: string; type: string }[];
 			objects: number;
 			timeSeconds: number;
 			weightGrams: number;
@@ -23,7 +24,7 @@
 			<p class="flex grow items-center justify-around">No hay placas</p>
 		{/if}
 		{#each plates as plate, index}
-			<article class="flex w-32 basis-auto flex-col justify-between">
+			<article class="flex w-32 basis-auto flex-col justify-between gap-1">
 				<div>
 					<img
 						class="aspect-square w-32 rounded object-cover"
@@ -33,6 +34,15 @@
 					<p class="line-clamp-2 font-bold" title={plate.name || `Placa ${index + 1}`}>
 						{plate.name || `Placa ${index + 1}`}
 					</p>
+				</div>
+				<div class="flex gap-1">
+					{#each plate.filaments as { color, type }}
+						<div
+							class="h-4 w-4 border border-white"
+							style="background-color: {color}"
+							title={`Filamento ${type}`}>
+						</div>
+					{/each}
 				</div>
 				<p class="flex gap-2 text-xs text-nowrap">
 					<span class="flex items-center gap-0.5">
