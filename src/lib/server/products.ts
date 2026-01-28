@@ -58,7 +58,7 @@ export async function createProduct({ file, name, description, thumbnail, catego
   });
 }
 
-export async function searchProducts({ query, limit = 10, page = 1 }: { query?: string, limit?: number, page?: number }) {
+export async function searchProducts({ query, limit, page }: { query?: string, limit: number, page: number }) {
   const tsQuery = sql`websearch_to_tsquery('spanish', ${query})`;
   const rankScore = sql<number>`ts_rank(${product.searchVector}, ${tsQuery})`;
   const similarityScore = sql<number>`similarity(${product.name}, ${query})`;
@@ -74,6 +74,7 @@ export async function searchProducts({ query, limit = 10, page = 1 }: { query?: 
       plateCount: sql<number>`coalesce(count(${plate.modelId}), 0)`,
       timeSeconds: sql<number>`coalesce(${model.timeSeconds}, sum(${plate.timeSeconds}), 0)`,
       weightGrams: sql<number>`coalesce(${model.weightGrams}, sum(${plate.weightGrams}), 0)`,
+      count: sql<number>`count(*) over()`,
     })
     .from(product)
     .where(query ? or(sql`${product.searchVector} @@ ${tsQuery}`, sql`${similarityScore} > 0`) : sql`true`)
