@@ -1,4 +1,4 @@
-import { aliasedTable, and, asc, desc, eq, or, sql } from "drizzle-orm";
+import { aliasedTable, and, asc, desc, eq, or, SQL, sql } from "drizzle-orm";
 import { db } from "./db";
 import { model, plate, product, staticFile } from "./db/schema";
 import { uploadFile, uploadOptimizedImage } from "./uploads";
@@ -58,10 +58,17 @@ export async function createProduct({ file, name, description, thumbnail, catego
   });
 }
 
-export async function searchProducts({ query, limit, page }: { query?: string, limit: number, page: number }) {
+export async function searchProducts({ query, limit, page, orderBy }: { query?: string, limit: number, page: number, orderBy: string }) {
   const tsQuery = sql`websearch_to_tsquery('spanish', ${query})`;
   const rankScore = sql<number>`ts_rank(${product.searchVector}, ${tsQuery})`;
   const similarityScore = sql<number>`similarity(${product.name}, ${query})`;
+
+  const orderByMap: Record<string, SQL> = {
+    relevance: query ? desc(sql`${rankScore} + ${similarityScore}`) : asc(product.name),
+    createdAt: desc(product.createdAt),
+    name: asc(product.name),
+    price: asc(product.price),
+  }
 
   return db
     .select({
@@ -84,7 +91,7 @@ export async function searchProducts({ query, limit, page }: { query?: string, l
     .leftJoin(plate, eq(model.id, plate.modelId))
     .innerJoin(staticFile, eq(model.thumbnailId, staticFile.id))
     .groupBy(product.id, model.thumbnailId, staticFile.id, model.timeSeconds, model.weightGrams)
-    .orderBy(query ? desc(sql`${rankScore} + ${similarityScore}`) : asc(product.name));
+    .orderBy(orderByMap[orderBy] ?? orderByMap.relevance);
 }
 
 export async function getProductById(id: string, modelId?: string) {

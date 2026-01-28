@@ -10,16 +10,26 @@
 	type Props = { placeholder: string; count: number; perPage: number };
 	let { placeholder, count, perPage }: Props = $props();
 
+	const orderByMap = {
+		relevance: 'Relevancia',
+		createdAt: 'Fecha de creación',
+		name: 'Nombre',
+		price: 'Precio'
+	} as Record<string, string>;
+
 	let query = $state(page.url.searchParams.get('q') ?? '');
+	let orderBy = $state(page.url.searchParams.get('orderBy') ?? Object.keys(orderByMap)[0]);
 	let limit = $state(page.url.searchParams.get('limit') ?? '10');
 	let loading = $state(false);
 
-	const updateUrl = debounce((query: string, limit: string) => {
+	const updateUrl = debounce((query: string, limit: string, orderBy: string) => {
 		const url = new URL(page.url);
 		if (query) url.searchParams.set('q', query);
 		else url.searchParams.delete('q');
 		if (limit !== '10') url.searchParams.set('limit', limit);
 		else url.searchParams.delete('limit');
+		if (orderBy !== 'relevance') url.searchParams.set('orderBy', orderBy);
+		else url.searchParams.delete('orderBy');
 
 		goto(url, { replaceState: true, keepFocus: true, noScroll: true });
 		loading = false;
@@ -27,7 +37,7 @@
 
 	$effect(() => {
 		loading = true;
-		updateUrl(query, limit);
+		updateUrl(query, limit, orderBy);
 		return () => updateUrl.clear();
 	});
 </script>
@@ -49,7 +59,21 @@
 	</InputGroup.Root>
 
 	<div class="mt-2 flex justify-between">
-		<div class="flex gap-1">
+		<div class="flex flex-wrap gap-1">
+			<Select.Root type="single" bind:value={orderBy}>
+				<Select.Trigger class="grow">
+					<span>
+						Ordenar por:
+						<span class="text-muted-foreground">{orderByMap[orderBy]}</span>
+					</span>
+				</Select.Trigger>
+				<Select.Content>
+					{#each Object.entries(orderByMap) as [key, value]}
+						<Select.Item value={key}>{value}</Select.Item>
+					{/each}
+				</Select.Content>
+			</Select.Root>
+
 			<Select.Root type="single" bind:value={limit}>
 				<Select.Trigger>Límite: <span class="text-muted-foreground">{limit}</span></Select.Trigger>
 				<Select.Content>

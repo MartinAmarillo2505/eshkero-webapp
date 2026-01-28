@@ -7,8 +7,9 @@ export async function load({ url }) {
   const query = url.searchParams.get('q') || undefined;
   const limit = Math.max(1, Number(url.searchParams.get('limit')) || 10);
   const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
+  const orderBy = url.searchParams.get('orderBy') || 'relevance';
 
-  const products = await searchProducts({ query, limit, page });
+  const products = await searchProducts({ query, limit, page, orderBy });
   return { products, page, perPage: limit, count: products.at(0)?.count ?? 0 }
 }
 
@@ -76,7 +77,7 @@ export const actions: Actions = {
 
     const product = {
       file,
-      name: _3mf.name || name,
+      name: name || _3mf.name,
       description,
       thumbnail,
       categories: categories?.split(' ').filter(str => str.trim() !== '') || [],
