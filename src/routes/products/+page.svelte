@@ -7,6 +7,10 @@
 	const { data } = $props();
 </script>
 
+<svelte:head>
+	<title>Productos - Eshkero 3D</title>
+</svelte:head>
+
 <CreateProduct />
 
 <SearchBar placeholder="Buscar productos..." count={data.count} perPage={data.perPage} />

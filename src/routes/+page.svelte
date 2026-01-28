@@ -5,6 +5,10 @@
 	const { data } = $props();
 </script>
 
+<svelte:head>
+	<title>Eshkero 3D</title>
+</svelte:head>
+
 <h1 class="text-center text-2xl font-bold">Administrador de productos y modelos 3D</h1>
 <section class="grid grid-cols-3 gap-2 p-2">
 	<article class="flex items-center gap-4 rounded-xl bg-secondary p-2">

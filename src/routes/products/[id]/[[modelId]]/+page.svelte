@@ -12,6 +12,10 @@
 	const latestModel = $derived(!page.params.modelId || page.params.modelId === models.at(0)?.id);
 </script>
 
+<svelte:head>
+	<title>{product.name} - Producto</title>
+</svelte:head>
+
 <ProductHeader {...product} {latestModel} />
 <PlateCarousel {plates} />
 <ModelList productId={product.id} {models} />
