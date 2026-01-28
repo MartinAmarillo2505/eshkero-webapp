@@ -11,7 +11,8 @@
 
 	const setPage = (pageNum: number) => {
 		const url = new URL(page.url);
-		url.searchParams.set('page', pageNum.toString());
+		if (pageNum !== 1) url.searchParams.set('page', pageNum.toString());
+		else url.searchParams.delete('page');
 		goto(url, { replaceState: true, keepFocus: true, noScroll: true });
 	};
 </script>
