@@ -11,9 +11,11 @@
 	<title>Productos - Eshkero 3D</title>
 </svelte:head>
 
-<CreateProduct />
+<section class="mx-auto mb-2 max-w-300">
+	<CreateProduct />
+	<SearchBar placeholder="Buscar productos..." count={data.count} perPage={data.perPage} />
+</section>
 
-<SearchBar placeholder="Buscar productos..." count={data.count} perPage={data.perPage} />
 <section
 	class="mx-auto mb-4 grid w-full max-w-300 grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-2 gap-y-4">
 	{#each data.products as product}

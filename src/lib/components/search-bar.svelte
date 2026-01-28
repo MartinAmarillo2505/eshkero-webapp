@@ -32,7 +32,7 @@
 	});
 </script>
 
-<section class="mx-auto mb-2 max-w-2xl">
+<div>
 	<InputGroup.Root>
 		<InputGroup.Input {placeholder} bind:value={query} />
 		<InputGroup.Addon>
@@ -64,4 +64,4 @@
 		</div>
 		<Pagination class="mx-0 hidden w-auto sm:block" {count} {perPage} />
 	</div>
-</section>
+</div>
