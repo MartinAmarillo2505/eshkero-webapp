@@ -87,7 +87,7 @@ export async function searchProducts({ query, limit, page, orderBy }: { query?: 
     .where(query ? or(sql`${product.searchVector} @@ ${tsQuery}`, sql`${similarityScore} > 0`) : sql`true`)
     .limit(limit)
     .offset((page - 1) * limit)
-    .innerJoin(model, eq(product.id, model.productId))
+    .innerJoin(db.select().from(model).orderBy(desc(model.createdAt)).limit(1).as("model"), eq(product.id, model.productId))
     .leftJoin(plate, eq(model.id, plate.modelId))
     .innerJoin(staticFile, eq(model.thumbnailId, staticFile.id))
     .groupBy(product.id, model.thumbnailId, staticFile.id, model.timeSeconds, model.weightGrams)
