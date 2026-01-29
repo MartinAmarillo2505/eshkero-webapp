@@ -2,6 +2,7 @@
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import { formatTime } from '$lib/utils';
 	import { Clock, Layers2, Weight } from 'lucide-svelte';
+	import UploadForm from './upload-form.svelte';
 
 	type Props = {
 		productId: string;
@@ -23,6 +24,7 @@
 
 <section class="rounded bg-secondary p-2">
 	<h1 class="text-xl font-bold">Modelos</h1>
+	<UploadForm model={true} />
 	<div class="grid auto-rows-fr gap-4 rounded bg-primary-foreground p-2">
 		{#each models as model}
 			<article class="flex flex-nowrap gap-2">

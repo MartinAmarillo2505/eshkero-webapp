@@ -10,6 +10,8 @@
 	import InputTag from './input-tag.svelte';
 	import type { SubmitFunction } from '@sveltejs/kit';
 
+	let { model = false }: { model?: boolean } = $props();
+
 	let files = $state<FileList>();
 	let product = $state<Awaited<ReturnType<typeof analyze3mfFile>>>();
 	let useCustomImage = $state(false);
@@ -130,7 +132,9 @@
 							class="line-clamp-2 h-[2lh] resize-none bg-input/30 text-wrap whitespace-break-spaces"
 							name="description"
 							autocomplete="off"></textarea>
-						<InputTag placeholder="Agregar categorías..." name="categories" />
+						{#if !model}
+							<InputTag placeholder="Agregar categorías..." name="categories" />
+						{/if}
 					</div>
 					<p class="sm:text-md flex gap-2 text-sm text-nowrap">
 						<span class="flex items-center gap-0.5">
@@ -174,18 +178,20 @@
 					</p>
 				</div>
 			</div>
-			<div>
-				<span class="flex max-w-[5em] items-start gap-2 text-3xl font-bold">
-					$<input
-						type="number"
-						class="w-full [appearance:textfield] bg-input/30"
-						name="price"
-						min="0"
-						step="0.01"
-						placeholder="0.00" />
-				</span>
-				<p class="block text-xs text-muted-foreground italic">(precio estático)</p>
-			</div>
+			{#if !model}
+				<div>
+					<span class="flex max-w-[5em] items-start gap-2 text-3xl font-bold">
+						$<input
+							type="number"
+							class="w-full [appearance:textfield] bg-input/30"
+							name="price"
+							min="0"
+							step="0.01"
+							placeholder="0.00" />
+					</span>
+					<p class="block text-xs text-muted-foreground italic">(precio estático)</p>
+				</div>
+			{/if}
 		</section>
 		<section
 			class="grid grid-cols-[repeat(auto-fill,400px)] justify-evenly gap-2 overflow-hidden p-2">
@@ -196,7 +202,7 @@
 		<div class="flex justify-between gap-2">
 			<div class="flex items-center">
 				{#if error}
-					<p class="text-red-400">Error al crear el producto: {error}</p>
+					<p class="text-red-400">Error al crear: {error}</p>
 				{/if}
 			</div>
 			<div class="flex gap-2">

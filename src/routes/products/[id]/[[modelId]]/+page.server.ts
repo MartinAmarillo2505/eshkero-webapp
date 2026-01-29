@@ -1,7 +1,8 @@
-import { getModelsByProductId } from '$lib/server/models.js';
+import { analyze3mfFile } from '$lib/3mf.js';
+import { createModel, getModelsByProductId } from '$lib/server/models.js';
 import { getPlatesByModelId } from '$lib/server/plates.js';
 import { getProductById } from '$lib/server/products.js';
-import { error } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 
 export async function load({ params }) {
   const product = await getProductById(params.id, params.modelId);
@@ -11,4 +12,81 @@ export async function load({ params }) {
   const plates = await getPlatesByModelId(params.modelId ?? models[0].id);
 
   return { product, plates, models };
+}
+
+function getPlates(formData: FormData) {
+  const plates: Record<string, { name: string, timeSeconds: number, weightGrams: number }> = {}
+
+  for (const [key, value] of formData.entries()) {
+    const match = key.match(/^plate\[(\d+)\]\[(\w+)\]$/);
+    if (match) {
+      const [index, field] = match.slice(1);
+      plates[index] ??= { name: '', timeSeconds: 0, weightGrams: 0 };
+      if (field === 'name') plates[index][field] = value as string;
+      else if (field === 'timeSeconds') plates[index][field] = Number(value) || 0;
+      else if (field === 'weightGrams') plates[index][field] = Number(value) || 0;
+    }
+  }
+
+  return plates;
+}
+
+export const actions = {
+  create: async ({ request, params }) => {
+    const formData = await request.formData();
+
+    const file = formData.get('file') as File | null;
+    if (!file) return fail(400, { error: 'File is required' });
+
+    const name = formData.get('name') as string | null;
+    if (!name) return fail(400, { error: 'Name is required' });
+
+    const description = formData.get('description') as string | null;
+    if (description === null) return fail(400, { error: 'Description is required' });
+
+    let totalTimeSeconds = Number(formData.get('timeSeconds') as string ?? '');
+    let totalWeightGrams = Number(formData.get('weightGrams') as string ?? '');
+
+    const plates = getPlates(formData);
+    for (const [key, plate] of Object.entries(plates)) {
+      if (!totalTimeSeconds && !plate.timeSeconds) return fail(400, { error: `Plate ${key} must have a defined time` });
+      if (!totalWeightGrams && !plate.weightGrams) return fail(400, { error: `Plate ${key} must have a defined weight` });
+    }
+
+    if (!totalTimeSeconds) totalTimeSeconds = Object.values(plates).reduce((acc, plate) => acc + plate.timeSeconds, 0);
+    if (!totalWeightGrams) totalWeightGrams = Object.values(plates).reduce((acc, plate) => acc + plate.weightGrams, 0);
+
+    if (!totalTimeSeconds) return fail(400, { error: 'Total time is required' });
+    if (!totalWeightGrams) return fail(400, { error: 'Total weight is required' });
+
+    const useFileThumbnail = formData.get('useFileThumbnail') as string | null;
+
+    const { thumbnail: _3mfThumbnail, fileThumbnail: _3mfFileThumbnail, ..._3mf } = await analyze3mfFile(await file.arrayBuffer());
+    const thumbnail = (useFileThumbnail === 'on' ? await _3mfFileThumbnail : await _3mfThumbnail) ?? await _3mfFileThumbnail ?? await _3mfThumbnail ?? await Object.values(_3mf.plates ?? {}).find(plate => plate.thumbnail)?.thumbnail;
+    if (!thumbnail) return fail(400, { error: 'Thumbnail is required' });
+
+    if (Object.values(_3mf.plates).find(plate => !plate.thumbnail)) return fail(400, { error: 'All plates must have a thumbnail' });
+
+    // const fileSha1 = createHash('sha1').update(Buffer.from(await file.arrayBuffer())).digest('hex');
+    // const existingProduct = await getProductByFileSha1(fileSha1);
+    // if (existingProduct) return fail(400, { error: `Product with this file already exists: ${existingProduct.name}` });
+
+    const model = {
+      file,
+      versionName: name || _3mf.name,
+      versionNotes: description,
+      productId: params.id,
+      thumbnail,
+      timeSeconds: totalTimeSeconds,
+      weightGrams: totalWeightGrams,
+      plates: await Promise.all(Object.entries(plates).map(async ([k, v]) => {
+        const plate = { ..._3mf.plates[k], ...v };
+        return { ...plate, thumbnail: await plate.thumbnail!, filaments: plate.filaments.map(id => _3mf.filaments[id]) }
+      }))
+    };
+
+    await createModel(model);
+
+    return { success: true };
+  }
 }

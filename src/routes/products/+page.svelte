@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CreateProduct from '$lib/components/create-product.svelte';
+	import UploadForm from '$lib/components/upload-form.svelte';
 	import ProductCard from '$lib/components/product-card.svelte';
 	import SearchBar from '$lib/components/search-bar.svelte';
 	import Pagination from '$lib/components/pagination.svelte';
@@ -12,7 +12,7 @@
 </svelte:head>
 
 <section class="mx-auto mb-2 max-w-300">
-	<CreateProduct />
+	<UploadForm />
 	<SearchBar placeholder="Buscar productos..." count={data.count} perPage={data.perPage} />
 </section>
 
