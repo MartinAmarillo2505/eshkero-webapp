@@ -1,11 +1,67 @@
 import { aliasedTable, asc, count, desc, eq, sql } from "drizzle-orm";
 import { db } from "./db";
 import { model, plate, staticFile } from "./db/schema";
+import { uploadFile, uploadOptimizedImage } from "./uploads";
+import type * as Schema from "./db/schema";
+import type { PgQueryResultHKT, PgTransaction } from "drizzle-orm/pg-core";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 const plateCount = sql<number>`coalesce(count(${plate.modelId}), 0)`;
 const timeSeconds = sql<number>`coalesce(sum(${plate.timeSeconds}), 0)`;
 const weightGrams = sql<number>`coalesce(sum(${plate.weightGrams}), 0)`;
 const thumbnailFile = aliasedTable(staticFile, "thumbnail_file");
+
+type Transaction = PgTransaction<PgQueryResultHKT, typeof Schema> | PostgresJsDatabase<typeof Schema>;
+
+type CreateModelArgs = {
+  file: File;
+  versionName: string;
+  versionNotes: string;
+  productId: string;
+  thumbnail: File;
+  timeSeconds?: number;
+  weightGrams?: number;
+  plates: {
+    name: string;
+    thumbnail: File;
+    timeSeconds: number;
+    weightGrams: number;
+    objects: number;
+    filaments: {
+      color: string;
+      type: string;
+    }[];
+  }[];
+};
+
+export async function createModel({ file, versionName, versionNotes, productId, thumbnail, timeSeconds, weightGrams, plates }: CreateModelArgs, tx: Transaction = db) {
+  return await tx.transaction(async (tx) => {
+    // Upload model
+    const modelThumbnail = await uploadOptimizedImage({ file: thumbnail, invoker: tx });
+    const modelFile = await uploadFile({ file, invoker: tx, storeFileName: true });
+    const [modelRow] = await tx.insert(model).values({
+      versionName,
+      versionNotes,
+      productId,
+      thumbnailId: modelThumbnail.id,
+      fileId: modelFile.id,
+      timeSeconds,
+      weightGrams,
+    }).returning();
+
+    // Upload plates
+    const plateThumbnails = await Promise.all(plates.map(plate => uploadOptimizedImage({ file: plate.thumbnail, invoker: tx })))
+    await tx.insert(plate).values(plates.map((plate, index) => ({
+      modelId: modelRow.id,
+      name: plate.name,
+      thumbnailId: plateThumbnails[index].id,
+      timeSeconds: plate.timeSeconds,
+      weightGrams: plate.weightGrams,
+      objects: plate.objects,
+      filaments: plate.filaments,
+    })))
+  });
+}
 
 export function getModelsByProductId(productId: string) {
   return db.select({

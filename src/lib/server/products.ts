@@ -1,7 +1,7 @@
 import { aliasedTable, and, asc, desc, eq, or, SQL, sql } from "drizzle-orm";
 import { db } from "./db";
 import { model, plate, product, staticFile } from "./db/schema";
-import { uploadFile, uploadOptimizedImage } from "./uploads";
+import { createModel } from "./models";
 
 type CreateProductArgs = {
   file: File;
@@ -30,31 +30,16 @@ export async function createProduct({ file, name, description, thumbnail, catego
     // Upload Product
     const [productRow] = await tx.insert(product).values({ name, description, categories, price }).returning();
 
-    // Upload model
-    // TODO: move to models.ts
-    const modelThumbnail = await uploadOptimizedImage({ file: thumbnail, invoker: tx });
-    const modelFile = await uploadFile({ file, invoker: tx, storeFileName: true });
-    const [modelRow] = await tx.insert(model).values({
+    await createModel({
+      file,
       versionName: "Version 1.0",
       versionNotes: "",
       productId: productRow.id,
-      thumbnailId: modelThumbnail.id,
-      fileId: modelFile.id,
+      thumbnail,
       timeSeconds,
       weightGrams,
-    }).returning();
-
-    // Upload plates
-    const plateThumbnails = await Promise.all(plates.map(plate => uploadOptimizedImage({ file: plate.thumbnail, invoker: tx })))
-    await tx.insert(plate).values(plates.map((plate, index) => ({
-      modelId: modelRow.id,
-      name: plate.name,
-      thumbnailId: plateThumbnails[index].id,
-      timeSeconds: plate.timeSeconds,
-      weightGrams: plate.weightGrams,
-      objects: plate.objects,
-      filaments: plate.filaments,
-    })))
+      plates,
+    }, tx);
   });
 }
 
